@@ -338,6 +338,7 @@ gen_tracepoint_table(void)
 	p = perf_table_clone();
 
 	err = 0;
+	int ret;
 	while((d1 = readdir(dir1)) && err >= 0) {
 
 		if (!strcmp(d1->d_name, "."))
@@ -346,8 +347,11 @@ gen_tracepoint_table(void)
 		if (!strcmp(d1->d_name, ".."))
 			continue;
 
-		snprintf(d2path, MAXPATHLEN, "%s/%s", debugfs_mnt, d1->d_name);
+		ret = snprintf(d2path, MAXPATHLEN, "%s/%s", debugfs_mnt, d1->d_name);
 
+		if (ret < 0) {
+         		abort();
+    		}
 		/* fails if d2path is not a directory */
 		dir2 = opendir(d2path);
 		if (!dir2)
@@ -385,6 +389,7 @@ gen_tracepoint_table(void)
 		numasks = 0;
 		reuse_event = 0;
 
+		int ret;
 		while((d2 = readdir(dir2))) {
 			if (!strcmp(d2->d_name, "."))
 				continue;
@@ -393,10 +398,16 @@ gen_tracepoint_table(void)
 				continue;
 
 #ifdef HAS_OPENAT
-                        snprintf(idpath, MAXPATHLEN, "%s/id", d2->d_name);
+                        ret = snprintf(idpath, MAXPATHLEN, "%s/id", d2->d_name);
+			if (ret < 0) {
+         			abort();
+    			}
                         fd = openat(dir2_fd, idpath, O_RDONLY);
 #else
-                        snprintf(idpath, MAXPATHLEN, "%s/%s/id", d2path, d2->d_name);
+                        ret = snprintf(idpath, MAXPATHLEN, "%s/%s/id", d2path, d2->d_name);
+			if (ret < 0) {
+                                abort();
+                        }
                         fd = open(idpath, O_RDONLY);
 #endif
 			if (fd == -1)

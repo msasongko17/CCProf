@@ -283,7 +283,10 @@ open_cgroup(char *name)
         if (cgroupfs_find_mountpoint(mnt, MAX_PATH+1))
                 errx(1, "cannot find cgroup fs mount point");
 
-        snprintf(path, MAX_PATH, "%s/%s", mnt, name);
+        int ret = snprintf(path, MAX_PATH, "%s/%s", mnt, name);
+	if (ret < 0) {
+         	abort();
+    	}
 
         cfd = open(path, O_RDONLY);
         if (cfd == -1)
